@@ -24,12 +24,6 @@
       text-align: center;
       margin-bottom: 0.3em;
     }
-    p.slogan {
-      font-size: 1em;
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 1.5em;
-    }
     input, button {
       font-size: 1.2em;
       padding: 10px;
@@ -49,7 +43,7 @@
 </head>
 <body>
   <h1>SKYMESH</h1>
-  <p class="slogan">CLAIM SKY. FROM STRATOSPHERE TO CHAIN.</p>
+  <p class="slogan">Claim SKY tokens by entering your code below</p>
   <input type="text" id="code" placeholder="Enter claim code">
   <button onclick="claimToken()">CLAIM SKY</button>
   <p id="status"></p>
@@ -61,28 +55,19 @@
       "function isCodeUsed(string code) public view returns (bool)"
     ];
 
-    const codeRewards = {
-      "XT7M-8PZ4": 100,
-      "9F3K-B8LA": 100,
-      "LA8R-2MPQ": 100,
-      "U3FJ-W4DK": 100,
-      "W2XN-AVB1": 100
-    };
+    const fixedReward = ethers.utils.parseEther("100");
 
     async function claimToken() {
       const code = document.getElementById("code").value.trim().toUpperCase();
       const status = document.getElementById("status");
 
-      if (!codeRewards[code]) {
-        status.innerText = "❌ Kod nie istnieje lub nie jest aktywny.";
+      if (!code || code.length < 5) {
+        status.innerText = "❌ Wprowadź kod.";
         return;
       }
 
-      const amount = ethers.utils.parseEther(codeRewards[code].toString());
-
       try {
         if (!window.ethereum) throw new Error("MetaMask is not installed");
-
         await ethereum.request({ method: "eth_requestAccounts" });
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
@@ -94,13 +79,13 @@
           return;
         }
 
-        const tx = await contract.claim(code, amount);
+        const tx = await contract.claim(code, fixedReward);
         status.innerText = "⏳ Wysyłanie transakcji...";
         await tx.wait();
-        status.innerText = "✅ Otrzymano SKY!";
+        status.innerText = "✅ SKY zostały przyznane!";
       } catch (err) {
         if (err.message.includes("Invalid code signature")) {
-          status.innerText = "❌ Kod jest nieprawidłowy lub wygenerowany niepoprawnie.";
+          status.innerText = "❌ Kod jest nieprawidłowy lub nieautoryzowany.";
         } else {
           status.innerText = "❌ Błąd: " + err.message;
         }
