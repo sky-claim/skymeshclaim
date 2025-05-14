@@ -24,6 +24,12 @@
       text-align: center;
       margin-bottom: 0.3em;
     }
+    p.slogan {
+      font-size: 1em;
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 1.5em;
+    }
     input, button {
       font-size: 1.2em;
       padding: 10px;
@@ -37,40 +43,31 @@
     #status {
       margin-top: 10px;
       text-align: center;
+      max-width: 90%;
     }
   </style>
 </head>
 <body>
   <h1>SKYMESH</h1>
+  <p class="slogan">CLAIM SKY. FROM STRATOSPHERE TO CHAIN.</p>
   <input type="text" id="code" placeholder="Enter claim code">
-  <button onclick="claimToken()">Claim SKY</button>
+  <button onclick="claimToken()">CLAIM SKY</button>
   <p id="status"></p>
 
   <script>
-    const codeRewards = {
-  "V3P4-KHA3": 50,
-  "HT8W-JNCY": 50,
-  "WVKH-IXH5": 50,
-  "3JUW-DWLL": 50,
-  "YV93-PA85": 50,
-  "F01Y-0JKP": 100,
-  "AVZ8-4PBK": 100,
-  "H8ZX-HCSU": 100,
-  "PPDW-HKLJ": 100,
-  "1FXM-GLQ9": 100,
-  "SLCN-YJHB": 200,
-  "ZPLJ-8NII": 200,
-  "VOE3-DBA6": 200,
-  "J8L3-ISGU": 200,
-  "5VGF-AZWG": 200,
-};
-
-
     const contractAddress = "0xD6A5203Bd1Db214C114Ff8De0A3EC8983BC796b6";
     const abi = [
       "function claim(string code, uint256 amount) public",
       "function isCodeUsed(string code) public view returns (bool)"
     ];
+
+    const codeRewards = {
+      "XT7M-8PZ4": 100,
+      "9F3K-B8LA": 100,
+      "LA8R-2MPQ": 100,
+      "U3FJ-W4DK": 100,
+      "W2XN-AVB1": 100
+    };
 
     async function claimToken() {
       const code = document.getElementById("code").value.trim().toUpperCase();
