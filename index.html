@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SkyMesh Token Claim</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
@@ -77,11 +77,19 @@
   <p id="status"></p>
 
   <script>
-    const contractAddress = "0x64687033FF24e7143a18aa61a2897fd8D95A28fc";
+    const contractAddress = "PASTE_YOUR_CONTRACT_ADDRESS_HERE";
     const abi = [
-      "function claim(string code) public",
+      "function claim(string code, uint256 amount) public",
       "function isCodeUsed(string code) public view returns (bool)"
     ];
+
+    function getAmountFromPrefix(code) {
+      if (code.startsWith("EASY")) return ethers.utils.parseEther("50");
+      if (code.startsWith("NORMAL")) return ethers.utils.parseEther("100");
+      if (code.startsWith("HARD")) return ethers.utils.parseEther("200");
+      if (code.startsWith("STANDARD")) return ethers.utils.parseEther("150");
+      return ethers.BigNumber.from("0");
+    }
 
     async function claimToken() {
       try {
@@ -92,7 +100,7 @@
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, abi, signer);
 
-        const code = document.getElementById("code").value;
+        const code = document.getElementById("code").value.trim().toUpperCase();
         if (!code) throw new Error("Please enter a code");
 
         const used = await contract.isCodeUsed(code);
@@ -101,7 +109,13 @@
           return;
         }
 
-        const tx = await contract.claim(code);
+        const amount = getAmountFromPrefix(code);
+        if (amount.eq(0)) {
+          document.getElementById("status").innerText = "Invalid code prefix.";
+          return;
+        }
+
+        const tx = await contract.claim(code, amount);
         document.getElementById("status").innerText = "Transaction sent. Waiting for confirmation...";
         await tx.wait();
         document.getElementById("status").innerText = "Success! SKY tokens claimed.";
