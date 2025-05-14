@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SkyMesh Claim</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -24,12 +24,6 @@
       text-align: center;
       margin-bottom: 0.3em;
     }
-    p.slogan {
-      font-size: 1em;
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 1.5em;
-    }
     input, button {
       font-size: 1.2em;
       padding: 10px;
@@ -40,39 +34,55 @@
       width: 80%;
       max-width: 400px;
     }
-    button {
-      cursor: pointer;
-    }
     #status {
       margin-top: 10px;
       text-align: center;
-      max-width: 90%;
     }
   </style>
 </head>
 <body>
   <h1>SKYMESH</h1>
-  <p class="slogan">CLAIM SKY. FROM STRATOSPHERE TO CHAIN.</p>
   <input type="text" id="code" placeholder="Enter claim code">
-  <button onclick="claimToken()">CLAIM SKY</button>
+  <button onclick="claimToken()">Claim SKY</button>
   <p id="status"></p>
 
   <script>
+    const codeRewards = {
+  "V3P4-KHA3": 50,
+  "HT8W-JNCY": 50,
+  "WVKH-IXH5": 50,
+  "3JUW-DWLL": 50,
+  "YV93-PA85": 50,
+  "F01Y-0JKP": 100,
+  "AVZ8-4PBK": 100,
+  "H8ZX-HCSU": 100,
+  "PPDW-HKLJ": 100,
+  "1FXM-GLQ9": 100,
+  "SLCN-YJHB": 200,
+  "ZPLJ-8NII": 200,
+  "VOE3-DBA6": 200,
+  "J8L3-ISGU": 200,
+  "5VGF-AZWG": 200,
+};
+
+
     const contractAddress = "0xD6A5203Bd1Db214C114Ff8De0A3EC8983BC796b6";
     const abi = [
       "function claim(string code, uint256 amount) public",
       "function isCodeUsed(string code) public view returns (bool)"
     ];
 
-    function getAmountFromPrefix(code) {
-      if (code.startsWith("EASY")) return ethers.utils.parseEther("50");
-      if (code.startsWith("NORMAL")) return ethers.utils.parseEther("100");
-      if (code.startsWith("HARD")) return ethers.utils.parseEther("200");
-      if (code.startsWith("STANDARD")) return ethers.utils.parseEther("150");
-      return ethers.BigNumber.from("0");
-    }
-
     async function claimToken() {
+      const code = document.getElementById("code").value.trim().toUpperCase();
+      const status = document.getElementById("status");
+
+      if (!codeRewards[code]) {
+        status.innerText = "❌ Kod nie istnieje lub nie jest aktywny.";
+        return;
+      }
+
+      const amount = ethers.utils.parseEther(codeRewards[code].toString());
+
       try {
         if (!window.ethereum) throw new Error("MetaMask is not installed");
 
@@ -81,35 +91,22 @@
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, abi, signer);
 
-        const code = document.getElementById("code").value.trim().toUpperCase();
-        if (!code) throw new Error("Please enter a code");
-
-        const amount = getAmountFromPrefix(code);
-        if (amount.eq(0)) {
-          document.getElementById("status").innerText = "Invalid code prefix.";
+        const used = await contract.isCodeUsed(code);
+        if (used) {
+          status.innerText = "⚠️ Kod już został wykorzystany.";
           return;
         }
 
-        try {
-          const used = await contract.isCodeUsed(code);
-          if (used) {
-            document.getElementById("status").innerText = "Code has already been used.";
-            return;
-          }
-          const tx = await contract.claim(code, amount);
-          document.getElementById("status").innerText = "Transaction sent. Waiting for confirmation...";
-          await tx.wait();
-          document.getElementById("status").innerText = "Success! SKY tokens claimed.";
-        } catch (innerError) {
-          if (innerError.message.includes("Invalid code signature")) {
-            document.getElementById("status").innerText = "Ten kod jest nieprawidłowy lub nie istnieje.";
-          } else {
-            throw innerError;
-          }
-        }
-
+        const tx = await contract.claim(code, amount);
+        status.innerText = "⏳ Wysyłanie transakcji...";
+        await tx.wait();
+        status.innerText = "✅ Otrzymano SKY!";
       } catch (err) {
-        document.getElementById("status").innerText = `Error: ${err.message}`;
+        if (err.message.includes("Invalid code signature")) {
+          status.innerText = "❌ Kod jest nieprawidłowy lub wygenerowany niepoprawnie.";
+        } else {
+          status.innerText = "❌ Błąd: " + err.message;
+        }
       }
     }
   </script>
