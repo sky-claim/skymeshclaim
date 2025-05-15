@@ -4,93 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SkyMesh Claim</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="style.css"/>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Courier New', monospace;
-      background-color: #000;
-      color: #00ff00;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      min-height: 100vh;
-    }
-    h1 {
-      font-size: 3em;
-      text-align: center;
-      margin-bottom: 0.3em;
-    }
-    input, button {
-      font-size: 1.2em;
-      padding: 10px;
-      margin: 5px;
-      border: 1px solid #00ff00;
-      background: #000;
-      color: #00ff00;
-      width: 80%;
-      max-width: 400px;
-    }
-    #status {
-      margin-top: 10px;
-      text-align: center;
-      max-width: 90%;
-    }
-  </style>
 </head>
 <body>
-  <h1>SKYMESH</h1>
-  <p class="slogan">Claim SKY tokens by entering your code below</p>
-  <input type="text" id="code" placeholder="Enter claim code">
-  <button onclick="claimToken()">CLAIM SKY</button>
-  <p id="status"></p>
-
-  <script>
-    const contractAddress = "0xFe2eFF503C4AB10DE448AC6b4439D49A38AF0e22";
-    const abi = [
-      "function claim(string code, uint256 amount) public",
-      "function isCodeUsed(string code) public view returns (bool)"
-    ];
-
-    const fixedReward = ethers.utils.parseEther("100");
-
-    async function claimToken() {
-      const code = document.getElementById("code").value.trim().toUpperCase();
-      const status = document.getElementById("status");
-
-      if (!code || code.length < 5) {
-        status.innerText = "❌ Wprowadź kod.";
-        return;
-      }
-
-      try {
-        if (!window.ethereum) throw new Error("MetaMask is not installed");
-        await ethereum.request({ method: "eth_requestAccounts" });
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(contractAddress, abi, signer);
-
-        const used = await contract.isCodeUsed(code);
-        if (used) {
-          status.innerText = "⚠️ Kod już został wykorzystany.";
-          return;
-        }
-
-        const tx = await contract.claim(code, fixedReward);
-        status.innerText = "⏳ Wysyłanie transakcji...";
-        await tx.wait();
-        status.innerText = "✅ SKY zostały przyznane!";
-      } catch (err) {
-        if (err.message.includes("Invalid code signature")) {
-          status.innerText = "❌ Kod jest nieprawidłowy lub nieautoryzowany.";
-        } else {
-          status.innerText = "❌ Błąd: " + err.message;
-        }
-      }
-    }
-  </script>
+  <div class="container">
+    <h1>SKYMESH</h1>
+    <p>Claim your SKY tokens</p>
+    <input type="text" id="codeInput" placeholder="Enter your code"/>
+    <button onclick="claimCode()">Claim SKY</button>
+    <p id="status"></p>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
