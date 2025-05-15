@@ -1,5 +1,5 @@
 
-const contractAddress = "0x07452Cd44Cfb4Eec601B8a452999d3A4C03cC2B5"; // ← Twój adres kontraktu
+const contractAddress = "0x074Ee1c07AAFd68D08dDF90F306677dc44a5ca74"; // ← Twój adres kontraktu
 const abi = [
   "function claim(string memory code) public",
 ];
